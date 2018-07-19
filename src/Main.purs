@@ -59,7 +59,6 @@ main = do
   socket <- WS.create "ws://localhost:7080" []
   listener <- EET.eventListener (log <<< eventToMessage)
   openListener <- EET.eventListener (const (WS.sendString socket z))
-
   EET.addEventListener WSET.onMessage listener false (WS.toEventTarget socket)
   EET.addEventListener WSET.onOpen openListener false (WS.toEventTarget socket)
   log "end of main"
