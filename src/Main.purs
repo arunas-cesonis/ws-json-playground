@@ -12,7 +12,7 @@ import FRP.Event.AnimationFrame (animationFrame)
 import FRP.Behavior.Keyboard (keys)
 import FRP.Behavior (sample_)
 
-loop _ x = x
+loop k x = show k
 
 z kbd = fold loop (sample_ (keys kbd) animationFrame) "x"
 
