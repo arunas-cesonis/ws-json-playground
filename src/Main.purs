@@ -20,8 +20,6 @@ instance encodeJsonMessage :: EncodeJson Message where
   encodeJson (Message o) =
     "text" := o.text ~> jsonEmptyObject
 
--- conn <- WS.create "ws://echo.websocket.org" []
-
 z = stringify $ encodeJson (Message {text})
   where
     text = "hello"
