@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <script src="node_modules/systemjs/dist/system.src.js"></script>
+    <script>
+      System
+        .import('output/Main/index.js')
+        .then(function (Main) {
+          Main.main()
+        })
+    </script>
+  </body>
+</html>
