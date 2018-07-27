@@ -34,21 +34,22 @@ vec2 x y = {x, y}
 
 type State =
   { stageSize :: Vec2
+  , debug :: String
   }
 
 initialState :: Vec2 -> State
 initialState stageSize =
   { stageSize
+  , debug: ""
   }
 
 background {x: w, y: h} = filled (fillColor black) (rectangle 0.0 0.0 w h)
 
 draw state = background (state.stageSize)
           <> filled (fillColor red) (rectangle 20.0 20.0 20.0 20.0)
-          <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) "HELLO"
+          <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) state.debug
  
-loop k state = state
-  where sk = show k
+loop k state = state {debug = show k}
 
 z :: Keyboard -> State -> Event State
 z kbd state = fold loop (sample_ (keys kbd) animationFrame) state
