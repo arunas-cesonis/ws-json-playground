@@ -45,8 +45,10 @@ initialState stageSize =
 
 background {x: w, y: h} = filled (fillColor black) (rectangle 0.0 0.0 w h)
 
+avatar {x, y} = filled (fillColor red) (rectangle x y 20.0 20.0)
+
 draw state = background (state.stageSize)
-          <> filled (fillColor red) (rectangle 20.0 20.0 20.0 20.0)
+          <> avatar (vec2 5.0 5.0)
           <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) state.debug
  
 loop k state = state {debug = show k}
