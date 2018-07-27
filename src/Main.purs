@@ -8,6 +8,7 @@ import Data.Maybe (fromJust)
 
 import FRP.Event (Event, subscribe, fold)
 import FRP.Event.Keyboard (down, getKeyboard, Keyboard)
+import FRP.Event.Mouse (getMouse, Mouse)
 import FRP.Event.AnimationFrame (animationFrame)
 import FRP.Behavior.Keyboard (keys)
 import FRP.Behavior (sample_)
@@ -23,6 +24,11 @@ import Partial.Unsafe (unsafePartial)
 import Network (runNetwork)
 
 red = rgba 255 0 0 1.0
+
+type InputDevices =
+  { keyboard :: Keyboard
+  , mouse :: Mouse
+  }
 
 type Vec2 =
   { x :: Number
@@ -53,8 +59,8 @@ draw state = background (state.stageSize)
  
 loop k state = state {debug = show k}
 
-z :: Keyboard -> State -> Event State
-z kbd state = fold loop (sample_ (keys kbd) animationFrame) state
+z :: InputDevices -> State -> Event State
+z inputDevices state = fold loop (sample_ (keys inputDevices.keyboard) animationFrame) state
 
 main :: Effect Unit
 main = do
@@ -65,6 +71,7 @@ main = do
   w <- getCanvasWidth canvas
   h <- getCanvasHeight canvas
   state <- pure $ initialState (vec2 w h)
-  kbd <- getKeyboard
-  _ <- subscribe (z kbd state) (render ctx <<< draw)
+  keyboard <- getKeyboard
+  mouse <- getMouse
+  _ <- subscribe (z {keyboard, mouse} state) (render ctx <<< draw)
   log "end of main"
