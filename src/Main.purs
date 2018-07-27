@@ -13,8 +13,9 @@ import FRP.Behavior.Keyboard (keys)
 import FRP.Behavior (sample_)
 
 import Graphics.Drawing (render)
-import Color (black, rgba)
+import Color (black, white, rgba)
 import Graphics.Drawing (Drawing, fillColor, filled, rectangle, text)
+import Graphics.Drawing.Font (font, serif, bold)
 import Graphics.Canvas (getCanvasElementById, getContext2D, getCanvasWidth, getCanvasHeight)
 
 import Partial.Unsafe (unsafePartial)
@@ -44,8 +45,10 @@ background {x: w, y: h} = filled (fillColor black) (rectangle 0.0 0.0 w h)
 
 draw state = background (state.stageSize)
           <> filled (fillColor red) (rectangle 20.0 20.0 20.0 20.0)
-
+          <> text (font serif 12 bold) 20.0 20.0 (fillColor white) "HELLO"
+ 
 loop k state = state
+  where sk = show k
 
 z :: Keyboard -> State -> Event State
 z kbd state = fold loop (sample_ (keys kbd) animationFrame) state
