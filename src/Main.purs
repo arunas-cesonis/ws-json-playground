@@ -11,6 +11,7 @@ import FRP.Event.Keyboard (down, getKeyboard, Keyboard)
 import FRP.Event.Mouse (getMouse, Mouse)
 import FRP.Event.AnimationFrame (animationFrame)
 import FRP.Behavior.Keyboard (keys)
+import FRP.Behavior.Mouse (position)
 import FRP.Behavior (sample_)
 
 import Graphics.Drawing (render)
@@ -60,7 +61,7 @@ draw state = background (state.stageSize)
 loop k state = state {debug = show k}
 
 z :: InputDevices -> State -> Event State
-z inputDevices state = fold loop (sample_ (keys inputDevices.keyboard) animationFrame) state
+z inputDevices state = fold loop (sample_ (position inputDevices.mouse) animationFrame) state
 
 main :: Effect Unit
 main = do
