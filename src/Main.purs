@@ -4,7 +4,9 @@ import Prelude
 import Effect (Effect)
 import Effect.Console (log)
 
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, maybe)
+import Data.Set as S
+import Data.Int (toNumber)
 
 import FRP.Event (Event, subscribe, fold)
 import FRP.Event.Keyboard (down, getKeyboard, Keyboard)
@@ -12,7 +14,8 @@ import FRP.Event.Mouse (getMouse, Mouse)
 import FRP.Event.AnimationFrame (animationFrame)
 import FRP.Behavior.Keyboard (keys)
 import FRP.Behavior.Mouse (position)
-import FRP.Behavior (sample_)
+import FRP.Behavior (ABehavior, sample_)
+import Vector
 
 import Graphics.Drawing (render)
 import Color (black, white, rgba)
@@ -31,38 +34,42 @@ type InputDevices =
   , mouse :: Mouse
   }
 
-type Vec2 =
-  { x :: Number
-  , y :: Number
+type InputState =
+  { mousePosition :: Vector
+  , keysDown :: S.Set String
   }
 
-vec2 :: Number -> Number -> Vec2
-vec2 x y = {x, y}
-
 type State =
-  { stageSize :: Vec2
+  { stageSize :: Vector
   , debug :: String
   }
 
-initialState :: Vec2 -> State
+initialState :: Vector -> State
 initialState stageSize =
   { stageSize
   , debug: ""
   }
 
-background {x: w, y: h} = filled (fillColor black) (rectangle 0.0 0.0 w h)
+background (Vector {x: w, y: h}) = filled (fillColor black) (rectangle 0.0 0.0 w h)
 
-avatar {x, y} = filled (fillColor red) (rectangle x y 20.0 20.0)
+avatar (Vector {x, y}) = filled (fillColor red) (rectangle x y 20.0 20.0)
 
 draw state = background (state.stageSize)
-          <> avatar (vec2 5.0 5.0)
+          <> avatar (vec 5.0 5.0)
           <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) state.debug
  
 loop input state = state {debug = show input}
 
+mousePositionToVector :: { x :: Int, y :: Int } -> Vector
+mousePositionToVector {x, y} = vec (toNumber x) (toNumber y)
+
+inputBehavior :: InputDevices -> ABehavior Event InputState
 inputBehavior inputDevices = merge <$> position inputDevices.mouse <*> keys inputDevices.keyboard
   where
-     merge m k = {m, k}
+     merge m k =
+      { mousePosition: maybe origin mousePositionToVector m
+      , keysDown: k
+      }
 
 z :: InputDevices -> State -> Event State
 z inputDevices state = fold loop (sample_ (inputBehavior inputDevices) animationFrame) state
@@ -75,7 +82,7 @@ main = do
   ctx <- getContext2D canvas
   w <- getCanvasWidth canvas
   h <- getCanvasHeight canvas
-  state <- pure $ initialState (vec2 w h)
+  state <- pure $ initialState (vec w h)
   keyboard <- getKeyboard
   mouse <- getMouse
   _ <- subscribe (z {keyboard, mouse} state) (render ctx <<< draw)
