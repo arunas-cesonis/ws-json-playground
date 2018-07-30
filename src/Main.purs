@@ -19,7 +19,7 @@ import Vector
 
 import Graphics.Drawing (render)
 import Color (black, white, rgba)
-import Graphics.Drawing (Drawing, fillColor, filled, rectangle, text)
+import Graphics.Drawing (lineWidth, path, outlined, outlineColor, Point, Drawing, fillColor, filled, rectangle, text)
 import Graphics.Drawing.Font (font, serif)
 import Graphics.Canvas (getCanvasElementById, getContext2D, getCanvasWidth, getCanvasHeight)
 
@@ -28,6 +28,7 @@ import Partial.Unsafe (unsafePartial)
 import Network (runNetwork)
 
 red = rgba 255 0 0 1.0
+green = rgba 0 255 0 1.0
 
 type InputDevices =
   { keyboard :: Keyboard
@@ -62,8 +63,18 @@ initialState stageSize =
 
 background (Vector {x: w, y: h}) = filled (fillColor black) (rectangle 0.0 0.0 w h)
 
+toPoint :: Vector -> Point
+toPoint (Vector {x, y}) = {x, y}
+
+centeredRectangle x y w h = rectangle (x - w / 2.0) (y - h / 2.0) w h
+
 avatar :: Player -> Drawing
-avatar ({position: Vector {x, y}}) = filled (fillColor red) (rectangle x y 20.0 20.0)
+avatar player@({position: Vector {x, y}}) = body <> gun
+  where
+    gunStart = toPoint player.position
+    gunEnd = toPoint (player.position + vec 10.0 10.0)
+    gun = outlined (lineWidth 5.0 <> outlineColor green) (path [gunStart, gunEnd])
+    body = filled (fillColor red) (centeredRectangle x y 20.0 20.0)
 
 draw :: State -> Drawing
 draw state = background (state.stageSize)
