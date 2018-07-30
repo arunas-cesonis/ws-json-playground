@@ -58,10 +58,14 @@ draw state = background (state.stageSize)
           <> avatar (vec2 5.0 5.0)
           <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) state.debug
  
-loop k state = state {debug = show k}
+loop input state = state {debug = show input}
+
+inputBehavior inputDevices = merge <$> position inputDevices.mouse <*> keys inputDevices.keyboard
+  where
+     merge m k = {m, k}
 
 z :: InputDevices -> State -> Event State
-z inputDevices state = fold loop (sample_ (position inputDevices.mouse) animationFrame) state
+z inputDevices state = fold loop (sample_ (inputBehavior inputDevices) animationFrame) state
 
 main :: Effect Unit
 main = do
