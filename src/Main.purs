@@ -39,23 +39,33 @@ type InputState =
   , keysDown :: S.Set String
   }
 
+type Player =
+  { position :: Vector
+  , aimAngle :: Number
+  }
+
 type State =
   { stageSize :: Vector
   , debug :: String
-  , player :: Vector
+  , player :: Player
   }
 
 initialState :: Vector -> State
 initialState stageSize =
   { stageSize
   , debug: ""
-  , player: scale 0.5 stageSize
+  , player:
+    { position: scale 0.5 stageSize
+    , aimAngle: 0.0
+    }
   }
 
 background (Vector {x: w, y: h}) = filled (fillColor black) (rectangle 0.0 0.0 w h)
 
-avatar (Vector {x, y}) = filled (fillColor red) (rectangle x y 20.0 20.0)
+avatar :: Player -> Drawing
+avatar ({position: Vector {x, y}}) = filled (fillColor red) (rectangle x y 20.0 20.0)
 
+draw :: State -> Drawing
 draw state = background (state.stageSize)
           <> avatar state.player
           <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) state.debug
