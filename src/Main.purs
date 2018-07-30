@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude
+import Prelude (Unit, bind, discard, mempty, pure, show, ($), (+), (-), (/), (<$>), (<*>), (<<<), (<>))
 import Effect (Effect)
 import Effect.Console (log)
 
@@ -10,17 +10,16 @@ import Data.Int (toNumber)
 import Math as Math
 
 import FRP.Event (Event, subscribe, fold)
-import FRP.Event.Keyboard (down, getKeyboard, Keyboard)
+import FRP.Event.Keyboard (getKeyboard, Keyboard)
 import FRP.Event.Mouse (getMouse, Mouse)
 import FRP.Event.AnimationFrame (animationFrame)
 import FRP.Behavior.Keyboard (keys)
 import FRP.Behavior.Mouse (position)
 import FRP.Behavior (ABehavior, sample_)
-import Vector
+import Vector (Vector(..), getX, getY, origin, scale, vec)
 
-import Graphics.Drawing (render)
-import Color (black, white, rgba)
-import Graphics.Drawing (lineWidth, path, outlined, outlineColor, Point, Drawing, fillColor, filled, rectangle, text)
+import Color (Color, black, white, rgba)
+import Graphics.Drawing (Shape, render, lineWidth, path, outlined, outlineColor, Point, Drawing, fillColor, filled, rectangle, text)
 import Graphics.Drawing.Font (font, serif)
 import Graphics.Canvas (getCanvasElementById, getContext2D, getCanvasWidth, getCanvasHeight)
 
@@ -28,7 +27,10 @@ import Partial.Unsafe (unsafePartial)
 
 import Network (runNetwork)
 
+red :: Color
 red = rgba 255 0 0 1.0
+
+green :: Color
 green = rgba 0 255 0 1.0
 
 type InputDevices =
@@ -62,11 +64,13 @@ initialState stageSize =
     }
   }
 
+background :: Vector -> Drawing
 background (Vector {x: w, y: h}) = filled (fillColor black) (rectangle 0.0 0.0 w h)
 
 toPoint :: Vector -> Point
 toPoint (Vector {x, y}) = {x, y}
 
+centeredRectangle :: Number -> Number -> Number -> Number -> Shape
 centeredRectangle x y w h = rectangle (x - w / 2.0) (y - h / 2.0) w h
 
 avatar :: Player -> Drawing
