@@ -42,12 +42,14 @@ type InputState =
 type State =
   { stageSize :: Vector
   , debug :: String
+  , player :: Vector
   }
 
 initialState :: Vector -> State
 initialState stageSize =
   { stageSize
   , debug: ""
+  , player: scale 0.5 stageSize
   }
 
 background (Vector {x: w, y: h}) = filled (fillColor black) (rectangle 0.0 0.0 w h)
@@ -55,7 +57,7 @@ background (Vector {x: w, y: h}) = filled (fillColor black) (rectangle 0.0 0.0 w
 avatar (Vector {x, y}) = filled (fillColor red) (rectangle x y 20.0 20.0)
 
 draw state = background (state.stageSize)
-          <> avatar (vec 5.0 5.0)
+          <> avatar state.player
           <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) state.debug
  
 loop input state = state {debug = show input}
