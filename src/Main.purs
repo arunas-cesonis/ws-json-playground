@@ -7,6 +7,7 @@ import Effect.Console (log)
 import Data.Maybe (fromJust, maybe)
 import Data.Set as S
 import Data.Int (toNumber)
+import Math as Math
 
 import FRP.Event (Event, subscribe, fold)
 import FRP.Event.Keyboard (down, getKeyboard, Keyboard)
@@ -72,7 +73,7 @@ avatar :: Player -> Drawing
 avatar player@({position: Vector {x, y}}) = body <> gun
   where
     gunStart = toPoint player.position
-    gunEnd = toPoint (player.position + vec 10.0 10.0)
+    gunEnd = toPoint (player.position + (scale 15.0 $ vec (Math.sin player.aimAngle) (Math.cos player.aimAngle)))
     gun = outlined (lineWidth 5.0 <> outlineColor green) (path [gunStart, gunEnd])
     body = filled (fillColor red) (centeredRectangle x y 20.0 20.0)
 
@@ -81,7 +82,17 @@ draw state = background (state.stageSize)
           <> avatar state.player
           <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) state.debug
  
-loop input state = state {debug = show input}
+loop :: InputState -> State -> State
+loop input state =
+  state
+    { debug = show aa
+    , player = state.player
+        { aimAngle = aa
+        }
+    }
+  where
+    rel = input.mousePosition - state.player.position
+    aa = Math.atan2 (getX rel) (getY rel)
 
 mousePositionToVector :: { x :: Int, y :: Int } -> Vector
 mousePositionToVector {x, y} = vec (toNumber x) (toNumber y)
