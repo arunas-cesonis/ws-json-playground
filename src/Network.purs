@@ -15,6 +15,8 @@ import Web.Socket.Event.MessageEvent as ME
 import Web.Event.EventTarget as EET
 import Web.Event.Event (Event)
 
+import FRP.Event as FRPE
+
 import Data.Argonaut.Core (stringify)
 import Data.Argonaut.Parser (jsonParser)
 import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=), (~>))
@@ -57,11 +59,19 @@ eventToMessage ev =
     Right (Message {text}) -> text
     Left err -> err
 
+message :: WS.WebSocket -> FRPE.Event String
+message socket = FRPE.makeEvent \k-> do
+  let target = (WS.toEventTarget socket)
+  listener <- EET.eventListener (k <<< eventToString)
+  EET.addEventListener WSET.onMessage listener false target
+  pure (EET.removeEventListener WSET.onMessage listener false target)
+
 runNetwork :: Effect Unit
 runNetwork = do
   socket <- WS.create "ws://localhost:7080" []
   listener <- EET.eventListener (log <<< eventToMessage)
   openListener <- EET.eventListener (const (WS.sendString socket z))
   EET.addEventListener WSET.onMessage listener false (WS.toEventTarget socket)
+  EET.removeEventListener WSET.onMessage listener false (WS.toEventTarget socket)
   EET.addEventListener WSET.onOpen openListener false (WS.toEventTarget socket)
   log "end of Network.run"
