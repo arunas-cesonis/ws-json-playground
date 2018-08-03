@@ -141,8 +141,11 @@ test :: Effect Unit
 test = do
   {event, trigger} <- myEv
   _ <- subscribe event \_-> do 
-    log "EVENT"
+    log "LISTENER 1"
+  c <- subscribe event \_-> do 
+    log "LISTENER 2"
   trigger unit
+  c
   trigger unit
   trigger unit
   pure unit
