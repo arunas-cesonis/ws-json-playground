@@ -5,7 +5,7 @@ import Effect (Effect)
 import Effect.Console (log)
 
 import Data.Either (Either(..), hush)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, fromJust)
 
 import Control.Monad.Except (runExcept)
 
@@ -22,6 +22,8 @@ import Data.Argonaut.Parser (jsonParser)
 import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=), (~>))
 import Data.Argonaut.Decode (class DecodeJson, decodeJson, (.?))
 import Data.Argonaut (jsonEmptyObject)
+
+import Partial.Unsafe (unsafePartial)
 
 import Foreign (readString, unsafeToForeign)
 
@@ -59,19 +61,17 @@ eventToMessage ev =
     Right (Message {text}) -> text
     Left err -> err
 
-message :: WS.WebSocket -> FRPE.Event String
+message :: WS.WebSocket -> FRPE.Event Event
 message socket = FRPE.makeEvent \k-> do
   let target = (WS.toEventTarget socket)
-  listener <- EET.eventListener (k <<< eventToString)
+  listener <- EET.eventListener k
   EET.addEventListener WSET.onMessage listener false target
   pure (EET.removeEventListener WSET.onMessage listener false target)
 
 runNetwork :: Effect Unit
 runNetwork = do
   socket <- WS.create "ws://localhost:7080" []
-  listener <- EET.eventListener (log <<< eventToMessage)
   openListener <- EET.eventListener (const (WS.sendString socket z))
-  EET.addEventListener WSET.onMessage listener false (WS.toEventTarget socket)
-  EET.removeEventListener WSET.onMessage listener false (WS.toEventTarget socket)
+  _ <- FRPE.subscribe (message socket) (log <<< eventToMessage)
   EET.addEventListener WSET.onOpen openListener false (WS.toEventTarget socket)
   log "end of Network.run"
