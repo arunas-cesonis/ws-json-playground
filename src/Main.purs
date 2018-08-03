@@ -137,8 +137,19 @@ myEv = do
       ) m)
     pure {event, trigger}
 
+test :: Effect Unit
+test = do
+  {event, trigger} <- myEv
+  _ <- subscribe event \_-> do 
+    log "EVENT"
+  trigger unit
+  trigger unit
+  trigger unit
+  pure unit
+
 main :: Effect Unit
 main = do
+  test
   runNetwork
   mc <- getCanvasElementById "canvas"
   let canvas = unsafePartial (fromJust mc)
