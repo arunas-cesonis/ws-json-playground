@@ -1,15 +1,18 @@
 module Main where
 
-import Prelude (Unit, bind, discard, mempty, pure, show, ($), (+), (-), (/), (<$>), (<*>), (<<<), (<>))
+import Prelude (unit, Unit, bind, discard, mempty, pure, show, ($), (+), (-), (/), (<$>), (<*>), (<<<), (<>), map, void)
 import Effect (Effect)
 import Effect.Console (log)
 
+import Data.Array
+import Data.Traversable
 import Data.Maybe (fromJust, maybe)
 import Data.Set as S
+import Data.Map as M
 import Data.Int (toNumber)
 import Math as Math
 
-import FRP.Event (Event, subscribe, fold)
+import FRP.Event (Event, subscribe, fold, makeEvent)
 import FRP.Event.Keyboard (getKeyboard, Keyboard)
 import FRP.Event.Mouse (getMouse, Mouse)
 import FRP.Event.AnimationFrame (animationFrame)
@@ -24,6 +27,7 @@ import Graphics.Drawing.Font (font, serif)
 import Graphics.Canvas (getCanvasElementById, getContext2D, getCanvasWidth, getCanvasHeight)
 
 import Partial.Unsafe (unsafePartial)
+import Effect.Ref as Ref
 
 import Network (runNetwork)
 
@@ -111,6 +115,27 @@ inputBehavior inputDevices = merge <$> position inputDevices.mouse <*> keys inpu
 
 z :: InputDevices -> State -> Event State
 z inputDevices state = fold loop (sample_ (inputBehavior inputDevices) animationFrame) state
+
+okay :: M.Map Int (Unit -> Effect Unit) -> Effect (M.Map Int Unit)
+okay m = sequence (map (\x-> do
+           x unit
+        ) m)
+
+myEv :: Effect {event :: Event Unit, trigger :: Unit -> Effect Unit}
+myEv = do
+    listeners <- Ref.new M.empty
+    event <- pure $ makeEvent \k-> do
+      m <- Ref.read listeners
+      id <- pure $ M.size m
+      Ref.write (M.insert id k m) listeners
+      pure $ do
+        Ref.write (M.delete id m) listeners
+    trigger <- pure \_-> do
+      m <- Ref.read listeners
+      void $ sequence (map (\k-> do
+        k unit
+      ) m)
+    pure {event, trigger}
 
 main :: Effect Unit
 main = do
