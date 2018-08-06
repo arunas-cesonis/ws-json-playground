@@ -91,7 +91,7 @@ draw :: State -> Drawing
 draw state = background (state.stageSize)
           <> avatar state.player
           <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) state.debug
- 
+
 loop :: InputState -> State -> State
 loop input state =
   state
@@ -121,11 +121,8 @@ z inputDevices state = fold loop (sample_ (inputBehavior inputDevices) animation
 update :: Action -> State -> Tuple State Command
 update action state = Tuple state Noop
 
-draw2 :: State -> Drawing
-draw2 state = mempty
-
 main :: Effect Unit
-main = run {update, draw: draw2} (initialState origin)
+main = run {update, draw} (initialState origin)
   -- runNetwork
   -- mc <- getCanvasElementById "canvas"
   -- let canvas = unsafePartial (fromJust mc)
