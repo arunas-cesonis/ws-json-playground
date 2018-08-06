@@ -116,43 +116,8 @@ inputBehavior inputDevices = merge <$> position inputDevices.mouse <*> keys inpu
 z :: InputDevices -> State -> Event State
 z inputDevices state = fold loop (sample_ (inputBehavior inputDevices) animationFrame) state
 
-okay :: M.Map Int (Unit -> Effect Unit) -> Effect (M.Map Int Unit)
-okay m = sequence (map (\x-> do
-           x unit
-        ) m)
-
-myEv :: Effect {event :: Event Unit, trigger :: Unit -> Effect Unit}
-myEv = do
-    listeners <- Ref.new M.empty
-    event <- pure $ makeEvent \k-> do
-      m <- Ref.read listeners
-      id <- pure $ M.size m
-      Ref.write (M.insert id k m) listeners
-      pure $ do
-        Ref.write (M.delete id m) listeners
-    trigger <- pure \_-> do
-      m <- Ref.read listeners
-      void $ sequence (map (\k-> do
-        k unit
-      ) m)
-    pure {event, trigger}
-
-test :: Effect Unit
-test = do
-  {event, trigger} <- myEv
-  _ <- subscribe event \_-> do 
-    log "LISTENER 1"
-  c <- subscribe event \_-> do 
-    log "LISTENER 2"
-  trigger unit
-  c
-  trigger unit
-  trigger unit
-  pure unit
-
 main :: Effect Unit
 main = do
-  test
   runNetwork
   mc <- getCanvasElementById "canvas"
   let canvas = unsafePartial (fromJust mc)
