@@ -15,6 +15,7 @@ import FRP.Behavior
 import FRP.Event
 import FRP.Event.AnimationFrame as FRP
 import FRP.Event.Keyboard as FRP
+import Graphics.Drawing (Drawing)
 import Debug.Trace (spy)
 import Vector
 
@@ -33,8 +34,8 @@ instance eqCommand :: Eq Command where
 instance showCommand :: Show Command where
   show = genericShow
 
-doCommand :: Command -> Effect Unit
-doCommand = logShow
+doCommand :: forall a. Tuple a Command -> Effect Unit
+doCommand = logShow <<< snd
 
 combineEvents :: forall m a. Traversable m => m (Event a) -> Event a
 combineEvents events = makeEvent \k->
@@ -47,8 +48,13 @@ actionEvent = combineEvents
   , map (const Frame) FRP.animationFrame
   ]
 
-run :: forall a. (Action -> a -> Tuple a Command) -> a -> Effect Unit
-run f init = void $ subscribe tick (doCommand <<< snd)
+type Run a =
+  { update :: Action -> a -> Tuple a Command
+  , draw :: a -> Drawing
+  }
+
+run :: forall a. Run a -> a -> Effect Unit
+run {update, draw} init = void $ subscribe tick doCommand
   where
-    comb x (Tuple s _) = f x s
-    tick = fold comb actionEvent (Tuple init Noop) 
+    f x (Tuple s _) = update x s
+    tick = fold f actionEvent (Tuple init Noop) 

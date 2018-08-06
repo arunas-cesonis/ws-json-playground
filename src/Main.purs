@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (unit, Unit, bind, discard, mempty, pure, show, ($), (+), (-), (/), (<$>), (<*>), (<<<), (<>), map, void)
+import Prelude
 import Effect (Effect)
 import Effect.Console (log)
 
@@ -8,6 +8,7 @@ import Data.Array
 import Data.Traversable
 import Data.Maybe (fromJust, maybe)
 import Data.Set as S
+import Data.Tuple
 import Data.Map as M
 import Data.Int (toNumber)
 import Math as Math
@@ -30,6 +31,7 @@ import Partial.Unsafe (unsafePartial)
 import Effect.Ref as Ref
 
 import Network (runNetwork)
+import Engine
 
 red :: Color
 red = rgba 255 0 0 1.0
@@ -116,16 +118,22 @@ inputBehavior inputDevices = merge <$> position inputDevices.mouse <*> keys inpu
 z :: InputDevices -> State -> Event State
 z inputDevices state = fold loop (sample_ (inputBehavior inputDevices) animationFrame) state
 
+update :: Action -> State -> Tuple State Command
+update action state = Tuple state Noop
+
+draw2 :: State -> Drawing
+draw2 state = mempty
+
 main :: Effect Unit
-main = do
-  runNetwork
-  mc <- getCanvasElementById "canvas"
-  let canvas = unsafePartial (fromJust mc)
-  ctx <- getContext2D canvas
-  w <- getCanvasWidth canvas
-  h <- getCanvasHeight canvas
-  state <- pure $ initialState (vec w h)
-  keyboard <- getKeyboard
-  mouse <- getMouse
-  _ <- subscribe (z {keyboard, mouse} state) (render ctx <<< draw)
-  log "end of main"
+main = run {update, draw: draw2} (initialState origin)
+  -- runNetwork
+  -- mc <- getCanvasElementById "canvas"
+  -- let canvas = unsafePartial (fromJust mc)
+  -- ctx <- getContext2D canvas
+  -- w <- getCanvasWidth canvas
+  -- h <- getCanvasHeight canvas
+  -- state <- pure $ initialState (vec w h)
+  -- keyboard <- getKeyboard
+  -- mouse <- getMouse
+  -- _ <- subscribe (z {keyboard, mouse} state) (render ctx <<< draw)
+  -- log "end of main"
