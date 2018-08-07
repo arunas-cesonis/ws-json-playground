@@ -39,7 +39,7 @@ doCommand = logShow <<< snd
 
 combineEvents :: forall m a. Traversable m => m (Event a) -> Event a
 combineEvents events = makeEvent \k->
-  sequence (map (flip subscribe k) events) >>= pure <<< void <<< sequence
+ pure <<< void <<< sequence =<< sequence (map (flip subscribe k) events)
 
 actionEvent :: Event Action
 actionEvent = combineEvents
