@@ -17,12 +17,6 @@ import Web.Event.Event (Event, EventType(..))
 
 import FRP.Event as FRPE
 
-import Data.Argonaut.Core (stringify)
-import Data.Argonaut.Parser (jsonParser)
-import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=), (~>))
-import Data.Argonaut.Decode (class DecodeJson, decodeJson, (.?))
-import Data.Argonaut (jsonEmptyObject)
-
 import Partial.Unsafe (unsafePartial)
 import Effect.Ref as Ref
 
@@ -32,29 +26,11 @@ newtype Message = Message
   { text :: String
   }
 
-instance encodeJsonMessage :: EncodeJson Message where
-  encodeJson (Message o) =
-    "text" := o.text ~> jsonEmptyObject
-
-instance decodeJsonMessage :: DecodeJson Message where
-  decodeJson json = do
-    x <- decodeJson json
-    text <- x .? "text"
-    pure $ Message {text}
-
-z :: String
-z = stringify $ encodeJson (Message {text})
-  where
-    text = "hello"
-
 messageEventToString :: Event -> Maybe String
 messageEventToString ev =
   case ME.fromEvent ev of
     Just msgEvent -> (hush <<< runExcept <<< readString <<< unsafeToForeign <<< ME.data_) msgEvent
     Nothing -> Nothing
-
-dec :: String -> Either String Message
-dec str = decodeJson =<< jsonParser str
 
 makeWSEvent :: EventType -> WS.WebSocket -> FRPE.Event Event
 makeWSEvent eventType socket =FRPE.makeEvent \k-> do
