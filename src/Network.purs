@@ -69,19 +69,7 @@ message socket = FRPE.makeEvent \k-> do
   EET.addEventListener WSET.onMessage listener false target
   pure (EET.removeEventListener WSET.onMessage listener false target)
 
-doit cancel x = do
-  c <- Ref.read cancel
-  log x
-  maybe (pure unit) (\cc -> cc >>= pure) c
-
 runNetwork :: Effect Unit
 runNetwork = do
   socket <- WS.create "ws://localhost:7080" []
-  openListener <- EET.eventListener (const (WS.sendString socket z))
-
-  cancel <- Ref.new Nothing
-  c <- FRPE.subscribe (message socket) (doit cancel <<< eventToMessage)
-  Ref.write (Just c) cancel
-
-  EET.addEventListener WSET.onOpen openListener false (WS.toEventTarget socket)
   log "end of Network.run"
