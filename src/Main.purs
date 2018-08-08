@@ -117,10 +117,8 @@ instance showVector :: Show a => Show (W a) where
   show (W x) = show x
 
 instance readMap :: ReadForeign a => ReadForeign (W (M.Map String a)) where
-  readImpl = pure <<< W <<< objectToMap <=< readObject
+  readImpl = pure <<< W <<< objectToMap <=< JSON.read'
     where
-      readObject :: Foreign -> F (Object a)
-      readObject = JSON.read'
       objectToMap :: forall a. Object a -> M.Map String a
       objectToMap x = M.fromFoldable ((Object.toUnfoldable x) :: Array (Tuple String a))
 
