@@ -33,11 +33,13 @@ import Partial.Unsafe (unsafePartial)
 import Effect.Ref as Ref
 
 import Foreign as Foreign
+import Foreign (F, Foreign)
 
 import Network as Network
 import Engine
 
 import Simple.JSON as JSON
+import Simple.JSON (class ReadForeign)
 import Foreign.Object (Object)
 import Foreign.Object as Object
 
@@ -106,17 +108,29 @@ update action state = Tuple state Noop
 -- parser :: String -> Either Foreign.MultipleErrors Message
 -- parser = JSON.readJSON
 
+message :: Network.Socket -> Event String
+message socket = filterMap identity (Network.messageEventToString <$> Network.message socket)
+
+newtype W a = W a
+
+instance showVector :: Show a => Show (W a) where
+  show (W x) = show x
+
+instance readMap :: ReadForeign a => ReadForeign (W (M.Map String a)) where
+  readImpl = pure <<< W <<< objectToMap <=< readObject
+    where
+      readObject :: Foreign -> F (Object a)
+      readObject = JSON.read'
+      objectToMap :: forall a. Object a -> M.Map String a
+      objectToMap x = M.fromFoldable ((Object.toUnfoldable x) :: Array (Tuple String a))
+
 type Message =
-  { m :: Object Int
+  { hello :: String
+  , m :: W (M.Map String Int)
   }
 
 parse :: String -> Either Foreign.MultipleErrors Message
 parse = JSON.readJSON
-
-message :: Network.Socket -> Event String
-message socket = filterMap id (Network.messageEventToString <$> Network.message socket)
-   where
-      id x = x
 
 main :: Effect Unit
 main = do
@@ -126,6 +140,6 @@ main = do
   _ <- subscribe (Network.open socket) \_-> do
     log "connected"
     Network.send socket "123"
-  let msg = parse "{\"m\": {\"KEY\":123}}"
+  let msg = parse "{\"hello\": \"world\", \"m\": {\"KEY\":123}}"
   logShow msg
   pure unit
