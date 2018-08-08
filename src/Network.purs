@@ -1,4 +1,4 @@
-module Network(connect, open, message) where
+module Network(connect, open, message, messageEventToString) where
 
 import Prelude
 import Effect (Effect)
@@ -47,20 +47,14 @@ z = stringify $ encodeJson (Message {text})
   where
     text = "hello"
 
-eventToString :: Event -> String
-eventToString ev =
+messageEventToString :: Event -> Maybe String
+messageEventToString ev =
   case ME.fromEvent ev of
-    Just msgEvent -> (fromMaybe "" <<< hush <<< runExcept <<< readString <<< unsafeToForeign <<< ME.data_) msgEvent
-    Nothing -> ""
+    Just msgEvent -> (hush <<< runExcept <<< readString <<< unsafeToForeign <<< ME.data_) msgEvent
+    Nothing -> Nothing
 
 dec :: String -> Either String Message
 dec str = decodeJson =<< jsonParser str
-
-eventToMessage :: Event -> String
-eventToMessage ev =
-  case (dec (eventToString ev)) of
-    Right (Message {text}) -> text
-    Left err -> err
 
 makeWSEvent :: EventType -> WS.WebSocket -> FRPE.Event Event
 makeWSEvent eventType socket =FRPE.makeEvent \k-> do

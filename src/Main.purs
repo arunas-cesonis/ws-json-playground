@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 import Effect (Effect)
-import Effect.Console (log)
+import Effect.Console (log, logShow)
 
 import Data.Array
 import Data.Traversable
@@ -96,15 +96,10 @@ update :: Action -> State -> Tuple State Command
 update action state = Tuple state Noop
 
 main :: Effect Unit
-main = run {update, draw} (initialState origin)
-  -- runNetwork
-  -- mc <- getCanvasElementById "canvas"
-  -- let canvas = unsafePartial (fromJust mc)
-  -- ctx <- getContext2D canvas
-  -- w <- getCanvasWidth canvas
-  -- h <- getCanvasHeight canvas
-  -- state <- pure $ initialState (vec w h)
-  -- keyboard <- getKeyboard
-  -- mouse <- getMouse
-  -- _ <- subscribe (z {keyboard, mouse} state) (render ctx <<< draw)
-  -- log "end of main"
+main = do
+  socket <- Network.connect "ws://127.0.0.1:8080"
+  _ <- subscribe (Network.message socket) \e->
+    logShow (Network.messageEventToString e)
+  _ <- subscribe (Network.open socket) \_->
+    log "connected"
+  pure unit

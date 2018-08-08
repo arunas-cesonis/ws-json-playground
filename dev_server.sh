@@ -2,4 +2,4 @@
 set -eu
 cd $(dirname "$0")
 bower install
-exec pulp server -p 8080
+exec pulp server -p 7080
