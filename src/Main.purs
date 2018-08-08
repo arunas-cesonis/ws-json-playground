@@ -8,6 +8,7 @@ import Data.Array
 import Data.Traversable
 import Data.Maybe (fromJust, maybe)
 import Data.Either
+import Data.Filterable (filterMap)
 import Data.Set as S
 import Data.Tuple
 import Data.Map as M
@@ -37,6 +38,8 @@ import Network as Network
 import Engine
 
 import Simple.JSON as JSON
+import Foreign.Object (Object)
+import Foreign.Object as Object
 
 red :: Color
 red = rgba 255 0 0 1.0
@@ -100,25 +103,29 @@ draw state = background (state.stageSize)
 update :: Action -> State -> Tuple State Command
 update action state = Tuple state Noop
 
+-- parser :: String -> Either Foreign.MultipleErrors Message
+-- parser = JSON.readJSON
 
 type Message =
-  { bam :: String
-  , x :: Array Int
+  { m :: Object Int
   }
 
-parser :: String -> Either Foreign.MultipleErrors Message
-parser = JSON.readJSON
+parse :: String -> Either Foreign.MultipleErrors Message
+parse = JSON.readJSON
+
+message :: Network.Socket -> Event String
+message socket = filterMap id (Network.messageEventToString <$> Network.message socket)
+   where
+      id x = x
 
 main :: Effect Unit
 main = do
   socket <- Network.connect "ws://127.0.0.1:8080"
-  _ <- subscribe (Network.message socket) \e->
-    logShow (Network.messageEventToString e)
+  _ <- subscribe (message socket) \e->
+    log e
   _ <- subscribe (Network.open socket) \_-> do
     log "connected"
     Network.send socket "123"
-  let msg = parser "{\"bam\":\"hello\",\"x\":[123, 1231]}"
-  case msg of
-    Right obj -> log ("WRITE" <> (JSON.writeJSON obj))
-    Left err -> logShow err
+  let msg = parse "{\"m\": {\"KEY\":123}}"
+  logShow msg
   pure unit

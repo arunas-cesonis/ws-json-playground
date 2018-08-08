@@ -1,4 +1,4 @@
-module Network(connect, open, message, send, messageEventToString) where
+module Network(connect, open, message, send, messageEventToString, Socket) where
 
 import Prelude
 import Effect (Effect)
@@ -32,21 +32,23 @@ messageEventToString ev =
     Just msgEvent -> (hush <<< runExcept <<< readString <<< unsafeToForeign <<< ME.data_) msgEvent
     Nothing -> Nothing
 
-makeWSEvent :: EventType -> WS.WebSocket -> FRPE.Event Event
-makeWSEvent eventType socket =FRPE.makeEvent \k-> do
+type Socket = WS.WebSocket
+
+makeWSEvent :: EventType -> Socket -> FRPE.Event Event
+makeWSEvent eventType socket = FRPE.makeEvent \k-> do
   let target = (WS.toEventTarget socket)
   listener <- EET.eventListener k
   EET.addEventListener eventType listener false target
   pure (EET.removeEventListener eventType listener false target)
 
-message :: WS.WebSocket -> FRPE.Event Event
+message :: Socket -> FRPE.Event Event
 message = makeWSEvent WSET.onMessage
 
-open :: WS.WebSocket -> FRPE.Event Event
+open :: Socket -> FRPE.Event Event
 open = makeWSEvent WSET.onOpen
 
-connect :: String -> Effect WS.WebSocket
+connect :: String -> Effect Socket
 connect url = WS.create url []
 
-send :: WS.WebSocket -> String -> Effect Unit
+send :: Socket -> String -> Effect Unit
 send = WS.sendString
