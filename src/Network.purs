@@ -1,4 +1,4 @@
-module Network(connect, open, message, messageEventToString) where
+module Network(connect, open, message, send, messageEventToString) where
 
 import Prelude
 import Effect (Effect)

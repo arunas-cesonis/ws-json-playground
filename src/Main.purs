@@ -100,6 +100,7 @@ main = do
   socket <- Network.connect "ws://127.0.0.1:8080"
   _ <- subscribe (Network.message socket) \e->
     logShow (Network.messageEventToString e)
-  _ <- subscribe (Network.open socket) \_->
+  _ <- subscribe (Network.open socket) \_-> do
     log "connected"
+    Network.send socket "123"
   pure unit
