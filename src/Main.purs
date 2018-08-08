@@ -30,7 +30,7 @@ import Graphics.Canvas (getCanvasElementById, getContext2D, getCanvasWidth, getC
 import Partial.Unsafe (unsafePartial)
 import Effect.Ref as Ref
 
-import Network (runNetwork)
+import Network as Network
 import Engine
 
 red :: Color
@@ -91,32 +91,6 @@ draw :: State -> Drawing
 draw state = background (state.stageSize)
           <> avatar state.player
           <> text (font serif 12 mempty) 20.0 20.0 (fillColor white) state.debug
-
-loop :: InputState -> State -> State
-loop input state =
-  state
-    { debug = show aa
-    , player = state.player
-        { aimAngle = aa
-        }
-    }
-  where
-    rel = input.mousePosition - state.player.position
-    aa = Math.atan2 (getX rel) (getY rel)
-
-mousePositionToVector :: { x :: Int, y :: Int } -> Vector
-mousePositionToVector {x, y} = vec (toNumber x) (toNumber y)
-
-inputBehavior :: InputDevices -> ABehavior Event InputState
-inputBehavior inputDevices = merge <$> position inputDevices.mouse <*> keys inputDevices.keyboard
-  where
-     merge m k =
-      { mousePosition: maybe origin mousePositionToVector m
-      , keysDown: k
-      }
-
-z :: InputDevices -> State -> Event State
-z inputDevices state = fold loop (sample_ (inputBehavior inputDevices) animationFrame) state
 
 update :: Action -> State -> Tuple State Command
 update action state = Tuple state Noop

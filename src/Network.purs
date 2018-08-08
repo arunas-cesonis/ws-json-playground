@@ -1,4 +1,4 @@
-module Network(runNetwork) where
+module Network(connect, open, message) where
 
 import Prelude
 import Effect (Effect)
@@ -13,7 +13,7 @@ import Web.Socket.WebSocket as WS
 import Web.Socket.Event.EventTypes as WSET
 import Web.Socket.Event.MessageEvent as ME
 import Web.Event.EventTarget as EET
-import Web.Event.Event (Event)
+import Web.Event.Event (Event, EventType(..))
 
 import FRP.Event as FRPE
 
@@ -62,14 +62,21 @@ eventToMessage ev =
     Right (Message {text}) -> text
     Left err -> err
 
-message :: WS.WebSocket -> FRPE.Event Event
-message socket = FRPE.makeEvent \k-> do
+makeWSEvent :: EventType -> WS.WebSocket -> FRPE.Event Event
+makeWSEvent eventType socket =FRPE.makeEvent \k-> do
   let target = (WS.toEventTarget socket)
   listener <- EET.eventListener k
-  EET.addEventListener WSET.onMessage listener false target
-  pure (EET.removeEventListener WSET.onMessage listener false target)
+  EET.addEventListener eventType listener false target
+  pure (EET.removeEventListener eventType listener false target)
 
-runNetwork :: Effect Unit
-runNetwork = do
-  socket <- WS.create "ws://localhost:7080" []
-  log "end of Network.run"
+message :: WS.WebSocket -> FRPE.Event Event
+message = makeWSEvent WSET.onMessage
+
+open :: WS.WebSocket -> FRPE.Event Event
+open = makeWSEvent WSET.onOpen
+
+connect :: String -> Effect WS.WebSocket
+connect url = WS.create url []
+
+send :: WS.WebSocket -> String -> Effect Unit
+send = WS.sendString
