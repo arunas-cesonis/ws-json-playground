@@ -42,6 +42,7 @@ import Simple.JSON as JSON
 import Simple.JSON (class ReadForeign)
 import Foreign.Object (Object)
 import Foreign.Object as Object
+import Shape
 
 red :: Color
 red = rgba 255 0 0 1.0
@@ -122,9 +123,11 @@ instance readMap :: ReadForeign a => ReadForeign (W (M.Map String a)) where
       objectToMap :: forall a. Object a -> M.Map String a
       objectToMap x = M.fromFoldable ((Object.toUnfoldable x) :: Array (Tuple String a))
 
+type XMap a =  W (M.Map String a)
+
 type Message =
-  { hello :: String
-  , m :: W (M.Map String Int)
+  { tag :: String
+  , gameworld :: XMap Int
   }
 
 parse :: String -> Either Foreign.MultipleErrors Message
@@ -140,4 +143,5 @@ main = do
     Network.send socket "123"
   let msg = parse "{\"hello\": \"world\", \"m\": {\"KEY\":123}}"
   logShow msg
+  logShow (Rectangle 12.0 34.0)
   pure unit
