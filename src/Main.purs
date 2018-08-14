@@ -43,6 +43,7 @@ import Simple.JSON (class ReadForeign)
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import Shape
+import Data.Generic.Rep as GR
 
 red :: Color
 red = rgba 255 0 0 1.0
