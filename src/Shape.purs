@@ -15,6 +15,7 @@ import Foreign (Foreign)
 
 data Shape =
     Square Number
+  | Point
   | Circle Number
   | Rectangle Number Number
 
@@ -44,9 +45,10 @@ instance sumEnumReadForeign ::
 
 instance constructorEnumReadForeignN ::
   ( IsSymbol name
-  ) => EnumReadForeign (GR.Constructor name (GR.Argument Number)) where
+  , JSON.ReadForeign a
+  ) => EnumReadForeign (GR.Constructor name (GR.Argument a)) where
   enumReadForeignImpl f = do
-    s :: { tag :: String, contents :: Number } <- JSON.readImpl f
+    s :: { tag :: String, contents :: a } <- JSON.readImpl f
     if s.tag == name
       then pure $ GR.Constructor (GR.Argument s.contents)
       else throwError <<< pure <<< Foreign.ForeignError $ "BAM 1"

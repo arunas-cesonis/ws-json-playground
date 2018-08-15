@@ -146,5 +146,5 @@ main = do
   logShow msg
   logShow (readShape "{\"tag\": \"Circle\", \"contents\": 100.0}")
   logShow (readShape "{\"tag\": \"Rectangle\", \"contents\": [11.0, 12.0]}")
-  logShow (readShape "{\"tag\": \"Square\"}")
+  logShow (readShape "{\"tag\": \"Point\"}")
   pure unit
