@@ -147,4 +147,5 @@ main = do
   logShow (readShape "{\"tag\": \"Circle\", \"contents\": 100.0}")
   logShow (readShape "{\"tag\": \"Rectangle\", \"contents\": [11.0, 12.0]}")
   logShow (readShape "{\"tag\": \"Point\"}")
+  logShow (readShape "{\"tag\": \"NamedCircle\", \"contents\": [\"X\", 12.0]}")
   pure unit

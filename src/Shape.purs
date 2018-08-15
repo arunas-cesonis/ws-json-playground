@@ -18,6 +18,7 @@ data Shape =
   | Point
   | Circle Number
   | Rectangle Number Number
+  | NamedCircle String Number
 
 derive instance genericShape :: GR.Generic Shape _
 
@@ -55,17 +56,27 @@ instance constructorEnumReadForeignN ::
     where
       name = reflectSymbol (SProxy :: SProxy name)
 
+instance argumentEnumReadForeign ::
+  ( JSON.ReadForeign a
+  ) => EnumReadForeign (GR.Argument a) where
+  enumReadForeignImpl f = GR.Argument <$> JSON.readImpl f
+
 instance constructorEnumReadForeignPN ::
   ( IsSymbol name
-  ) => EnumReadForeign (GR.Constructor name (GR.Product (GR.Argument Number) (GR.Argument Number))) where
+  , JSON.ReadForeign a
+  , JSON.ReadForeign b
+  ) => EnumReadForeign (GR.Constructor name (GR.Product (GR.Argument a) (GR.Argument b))) where
   enumReadForeignImpl f = do
-    s :: { tag :: String, contents :: Array Number } <- JSON.readImpl f
+    s :: { tag :: String, contents :: Array Foreign } <- JSON.readImpl f
     if s.tag == name
       then ok s.contents
       else throwError <<< pure <<< Foreign.ForeignError $ "BAM 3"
     where
       name = reflectSymbol (SProxy :: SProxy name)
-      ok [w, h] = pure $ GR.Constructor (GR.Product (GR.Argument w) (GR.Argument h))
+      ok [w, h] = do
+        ww <- enumReadForeignImpl w
+        hh <- enumReadForeignImpl h
+        pure $ GR.Constructor (GR.Product ww hh)
       ok _ = throwError <<< pure <<< Foreign.ForeignError $ "BAM 4"
 
 instance constructorEnumReadForeign ::
