@@ -14,10 +14,9 @@ import Foreign as Foreign
 import Foreign (Foreign)
 
 data Shape =
-    Square
+    Square Number
   | Circle Number
-  | Rectangle
-
+  | Rectangle Number Number
 
 derive instance genericShape :: GR.Generic Shape _
 
@@ -53,6 +52,19 @@ instance constructorEnumReadForeignN ::
       else throwError <<< pure <<< Foreign.ForeignError $ "BAM 1"
     where
       name = reflectSymbol (SProxy :: SProxy name)
+
+instance constructorEnumReadForeignPN ::
+  ( IsSymbol name
+  ) => EnumReadForeign (GR.Constructor name (GR.Product (GR.Argument Number) (GR.Argument Number))) where
+  enumReadForeignImpl f = do
+    s :: { tag :: String, contents :: Array Number } <- JSON.readImpl f
+    if s.tag == name
+      then ok s.contents
+      else throwError <<< pure <<< Foreign.ForeignError $ "BAM 3"
+    where
+      name = reflectSymbol (SProxy :: SProxy name)
+      ok [w, h] = pure $ GR.Constructor (GR.Product (GR.Argument w) (GR.Argument h))
+      ok _ = throwError <<< pure <<< Foreign.ForeignError $ "BAM 4"
 
 instance constructorEnumReadForeign ::
   ( IsSymbol name
