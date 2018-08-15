@@ -144,6 +144,6 @@ main = do
     Network.send socket "123"
   let msg = parse "{\"hello\": \"world\", \"m\": {\"KEY\":123}}"
   logShow msg
-  logShow (readShape "{\"tag\": \"Circle\"}")
+  logShow (readShape "{\"tag\": \"Circle\", \"contents\": 100.0}")
   logShow (readShape "{\"tag\": \"Square\"}")
   pure unit

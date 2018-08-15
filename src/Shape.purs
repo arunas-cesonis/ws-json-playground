@@ -47,9 +47,9 @@ instance constructorEnumReadForeignN ::
   ( IsSymbol name
   ) => EnumReadForeign (GR.Constructor name (GR.Argument Number)) where
   enumReadForeignImpl f = do
-    s :: { tag :: String } <- JSON.readImpl f
+    s :: { tag :: String, contents :: Number } <- JSON.readImpl f
     if s.tag == name
-      then pure $ GR.Constructor (GR.Argument 0.0)
+      then pure $ GR.Constructor (GR.Argument s.contents)
       else throwError <<< pure <<< Foreign.ForeignError $ "BAM 1"
     where
       name = reflectSymbol (SProxy :: SProxy name)
