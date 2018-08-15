@@ -47,8 +47,8 @@ instance constructorEnumReadForeignN ::
   ( IsSymbol name
   ) => EnumReadForeign (GR.Constructor name (GR.Argument Number)) where
   enumReadForeignImpl f = do
-    s <- JSON.readImpl f
-    if s == name
+    s :: { tag :: String } <- JSON.readImpl f
+    if s.tag == name
       then pure $ GR.Constructor (GR.Argument 0.0)
       else throwError <<< pure <<< Foreign.ForeignError $ "BAM 1"
     where
@@ -58,8 +58,8 @@ instance constructorEnumReadForeign ::
   ( IsSymbol name
   ) => EnumReadForeign (GR.Constructor name GR.NoArguments) where
   enumReadForeignImpl f = do
-    s <- JSON.readImpl f
-    if s == name
+    s :: { tag :: String } <- JSON.readImpl f
+    if s.tag == name
       then pure $ GR.Constructor GR.NoArguments
       else throwError <<< pure <<< Foreign.ForeignError $ "BAM 2"
     where
