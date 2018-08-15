@@ -145,4 +145,5 @@ main = do
   let msg = parse "{\"hello\": \"world\", \"m\": {\"KEY\":123}}"
   logShow msg
   logShow (readShape "\"Circle\"")
+  logShow (readShape "\"Square\"")
   pure unit

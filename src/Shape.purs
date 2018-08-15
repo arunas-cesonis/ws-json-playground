@@ -15,7 +15,7 @@ import Foreign (Foreign)
 
 data Shape =
     Square
-  | Circle
+  | Circle Number
   | Rectangle
 
 
@@ -43,6 +43,17 @@ instance sumEnumReadForeign ::
     = GR.Inl <$> enumReadForeignImpl f
     <|> GR.Inr <$> enumReadForeignImpl f
 
+instance constructorEnumReadForeignN ::
+  ( IsSymbol name
+  ) => EnumReadForeign (GR.Constructor name (GR.Argument Number)) where
+  enumReadForeignImpl f = do
+    s <- JSON.readImpl f
+    if s == name
+      then pure $ GR.Constructor (GR.Argument 0.0)
+      else throwError <<< pure <<< Foreign.ForeignError $ "BAM 1"
+    where
+      name = reflectSymbol (SProxy :: SProxy name)
+
 instance constructorEnumReadForeign ::
   ( IsSymbol name
   ) => EnumReadForeign (GR.Constructor name GR.NoArguments) where
@@ -50,7 +61,7 @@ instance constructorEnumReadForeign ::
     s <- JSON.readImpl f
     if s == name
       then pure $ GR.Constructor GR.NoArguments
-      else throwError <<< pure <<< Foreign.ForeignError $ "BAM"
+      else throwError <<< pure <<< Foreign.ForeignError $ "BAM 2"
     where
       name = reflectSymbol (SProxy :: SProxy name)
 
