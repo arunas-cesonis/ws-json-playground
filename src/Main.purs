@@ -37,12 +37,12 @@ import Foreign (F, Foreign)
 
 import Network as Network
 import Engine
+import Message
 
 import Simple.JSON as JSON
 import Simple.JSON (class ReadForeign)
 import Foreign.Object (Object)
 import Foreign.Object as Object
-import Shape
 import Data.Generic.Rep as GR
 
 red :: Color
@@ -126,14 +126,6 @@ instance readMap :: ReadForeign a => ReadForeign (W (M.Map String a)) where
 
 type XMap a =  W (M.Map String a)
 
-type Message =
-  { tag :: String
-  , gameworld :: XMap Int
-  }
-
-parse :: String -> Either Foreign.MultipleErrors Message
-parse = JSON.readJSON
-
 main :: Effect Unit
 main = do
   socket <- Network.connect "ws://127.0.0.1:8080"
@@ -142,11 +134,5 @@ main = do
   _ <- subscribe (Network.open socket) \_-> do
     log "connected"
     Network.send socket "123"
-  let msg = parse "{\"hello\": \"world\", \"m\": {\"KEY\":123}}"
-  logShow msg
-  logShow (readShape "{\"tag\": \"Point\"}")
-  logShow (readShape "{\"tag\": \"Circle\", \"contents\": 100.0}")
-  logShow (readShape "{\"tag\": \"Rectangle\", \"contents\": [11.0, 12.0]}")
-  logShow (readShape "{\"tag\": \"NamedCircle\", \"contents\": [\"X\", 12.0]}")
-  logShow (readShape "{\"tag\": \"NamedRectangle\", \"contents\": [\"X\", 12.0, 33131.0]}")
+  logShow (readMessage "{\"shape\":{\"tag\":\"Point\"}}")
   pure unit

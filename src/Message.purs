@@ -1,4 +1,4 @@
-module Shape(Shape(..), readShape) where
+module Message where
 
 import Prelude
 import Control.Alt ((<|>))
@@ -10,10 +10,10 @@ import Type.Prelude (class IsSymbol, SProxy(..), reflectSymbol)
 import Foreign.Index (readIndex, readProp)
 
 import Simple.JSON as JSON
+import GenericJSON (enumReadForeign)
 
 import Foreign as Foreign
 import Foreign (Foreign, readString)
-import GenericJSON (enumReadForeign)
 
 data Shape =
     Square Number
@@ -31,5 +31,9 @@ instance showShape :: Show Shape where
 instance shapeReadForeign :: JSON.ReadForeign Shape where
   readImpl = enumReadForeign
 
-readShape :: String -> Either Foreign.MultipleErrors Shape
-readShape = JSON.readJSON
+type Message =
+  { shape :: Shape
+  }
+
+readMessage :: String -> Either Foreign.MultipleErrors Message
+readMessage = JSON.readJSON
