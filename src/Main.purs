@@ -11,7 +11,6 @@ import Data.Either
 import Data.Filterable (filterMap)
 import Data.Set as S
 import Data.Tuple
-import Data.Map as M
 import Data.Int (toNumber)
 import Math as Math
 
@@ -112,19 +111,6 @@ update action state = Tuple state Noop
 
 message :: Network.Socket -> Event String
 message socket = filterMap identity (Network.messageEventToString <$> Network.message socket)
-
-newtype W a = W a
-
-instance showVector :: Show a => Show (W a) where
-  show (W x) = show x
-
-instance readMap :: ReadForeign a => ReadForeign (W (M.Map String a)) where
-  readImpl = pure <<< W <<< objectToMap <=< JSON.read'
-    where
-      objectToMap :: forall a. Object a -> M.Map String a
-      objectToMap x = M.fromFoldable ((Object.toUnfoldable x) :: Array (Tuple String a))
-
-type XMap a =  W (M.Map String a)
 
 main :: Effect Unit
 main = do
