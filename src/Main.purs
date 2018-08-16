@@ -37,11 +37,13 @@ import Foreign (F, Foreign)
 
 import Network as Network
 import Engine
+import Message
 
 import Simple.JSON as JSON
 import Simple.JSON (class ReadForeign)
 import Foreign.Object (Object)
 import Foreign.Object as Object
+import Data.Generic.Rep as GR
 
 red :: Color
 red = rgba 255 0 0 1.0
@@ -122,13 +124,7 @@ instance readMap :: ReadForeign a => ReadForeign (W (M.Map String a)) where
       objectToMap :: forall a. Object a -> M.Map String a
       objectToMap x = M.fromFoldable ((Object.toUnfoldable x) :: Array (Tuple String a))
 
-type Message =
-  { hello :: String
-  , m :: W (M.Map String Int)
-  }
-
-parse :: String -> Either Foreign.MultipleErrors Message
-parse = JSON.readJSON
+type XMap a =  W (M.Map String a)
 
 main :: Effect Unit
 main = do
@@ -138,6 +134,5 @@ main = do
   _ <- subscribe (Network.open socket) \_-> do
     log "connected"
     Network.send socket "123"
-  let msg = parse "{\"hello\": \"world\", \"m\": {\"KEY\":123}}"
-  logShow msg
+  logShow (readMessage "{\"shape\":{\"tag\":\"Point\"}}")
   pure unit
