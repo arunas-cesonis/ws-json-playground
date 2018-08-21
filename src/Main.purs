@@ -115,10 +115,11 @@ message socket = filterMap identity (Network.messageEventToString <$> Network.me
 main :: Effect Unit
 main = do
   socket <- Network.connect "ws://127.0.0.1:8080"
-  _ <- subscribe (message socket) \e->
+  _ <- subscribe (message socket) \e-> do
     log e
+    logShow (readMessage e)
+    Network.close socket
   _ <- subscribe (Network.open socket) \_-> do
     log "connected"
     Network.send socket "123"
-  logShow (readMessage "{\"shape\":{\"tag\":\"Point\"}}")
   pure unit

@@ -1,4 +1,4 @@
-module Network(connect, open, message, send, messageEventToString, Socket) where
+module Network(connect, open, message, send, messageEventToString, close, Socket) where
 
 import Prelude
 import Effect (Effect)
@@ -52,3 +52,6 @@ connect url = WS.create url []
 
 send :: Socket -> String -> Effect Unit
 send = WS.sendString
+
+close :: Socket -> Effect Unit
+close = WS.close
