@@ -13,3 +13,22 @@ main = do
 --  logShow (readShape "{\"tag\": \"Rectangle\", \"contents\": [11.0, 12.0]}")
 --  logShow (readShape "{\"tag\": \"NamedCircle\", \"contents\": [\"X\", 12.0]}")
 --  logShow (readShape "{\"tag\": \"NamedRectangle\", \"contents\": [\"X\", 12.0, 33131.0]}")
+
+testMessage = """
+[
+{
+  "tag": "GameWorldResp",
+  "contents": {
+    "avatars": {
+      "0": {
+        "shape": {
+          "tag": "MkSquare",
+          "contents": 0.0
+        }
+      }
+    },
+    "obstacles": {}
+  }
+}
+]
+"""

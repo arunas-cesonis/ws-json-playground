@@ -19,6 +19,7 @@ import Simple.JSON as JSON
 
 import Foreign as Foreign
 import Foreign (Foreign, readString)
+import Debug.Trace (spy)
 
 enumReadForeign :: forall a rep
   . GR.Generic a rep

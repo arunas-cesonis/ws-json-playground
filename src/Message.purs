@@ -19,9 +19,9 @@ import Foreign as Foreign
 import Foreign (Foreign, readString)
 
 data Shape =
-    Square Number
-  | Circle Number
-  | Rectangle Number Number
+    MkSquare Number
+  | MkCircle Number
+  | MkRectangle Number Number
 
 derive instance genericShape :: GR.Generic Shape _
 
@@ -46,11 +46,26 @@ type Angle =
   { a :: Number
   }
 
-type Object =
+type Object2 =
   { rotation :: Angle
-  , center :: Angle
+  , center :: Point
   , velocity :: Angle
   , shape :: Shape
+  }
+
+type Object =
+  { center :: Point
+  , shape :: Shape
+  , rotation :: Angle
+  , velocity :: Point
+  }
+
+type Avatar =
+  { object :: Object
+  }
+
+type Obstacle =
+  { object :: Object
   }
 
 newtype W a = W a
@@ -66,9 +81,9 @@ instance readMap :: JSON.ReadForeign a => JSON.ReadForeign (W (M.Map String a)) 
 
 type WMap a =  W (M.Map String a)
 
-data ActionResp = GameWorldResp { avatars :: WMap Object, obstacles :: WMap Object }
+data ActionResp = GameWorldResp { avatars :: WMap Avatar, obstacles :: WMap Obstacle }
 
 derive instance genericActionResp :: GR.Generic ActionResp _
 
-readMessage :: String -> Either Foreign.MultipleErrors ActionResp
+readMessage :: String -> Either Foreign.MultipleErrors (Array ActionResp)
 readMessage = JSON.readJSON
