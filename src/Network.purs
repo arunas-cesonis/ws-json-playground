@@ -5,6 +5,7 @@ import Effect (Effect)
 import Effect.Console (log)
 
 import Data.Either (Either(..), hush)
+import Data.Filterable (filterMap)
 import Data.Maybe (Maybe(..), fromMaybe, fromJust, maybe)
 
 import Control.Monad.Except (runExcept)
@@ -43,6 +44,9 @@ makeWSEvent eventType socket = FRPE.makeEvent \k-> do
 
 message :: Socket -> FRPE.Event Event
 message = makeWSEvent WSET.onMessage
+
+stringMessage :: Socket -> FRPE.Event String
+stringMessage socket = filterMap identity (messageEventToString <$> message socket)
 
 open :: Socket -> FRPE.Event Event
 open = makeWSEvent WSET.onOpen
