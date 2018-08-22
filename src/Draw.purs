@@ -1,4 +1,4 @@
-module Graphics
+module Draw
   ( drawWorld
   , getContext
   ) where
@@ -13,11 +13,11 @@ import Data.Map as M
 import Color (rgba, black)
 import Graphics.Drawing (Drawing, render, filled, circle, rectangle, fillColor, translate, rotate)
 import Graphics.Canvas (getCanvasElementById, getContext2D, Context2D)
-import Graphics
 
 import Message
 
 red = rgba 255 0 0 1.0
+green = rgba 0 255 0 1.0
 
 getContext :: String -> Effect Context2D
 getContext id = do
@@ -30,7 +30,7 @@ drawBackground = filled (fillColor black) (rectangle 0.0 0.0 1000.0 6000.0)
 drawObject :: Object -> Drawing
 drawObject {center, shape, rotation} = case shape of
   MkRectangle w h -> rect w h
-  MkCircle r -> t $ filled (fillColor red) (circle 0.0 1.0 r)
+  MkCircle r -> t $ filled (fillColor green) (circle 0.0 1.0 r)
   MkSquare s -> rect s s
   where
     t = translate center.x center.y <<< rotate rotation.a

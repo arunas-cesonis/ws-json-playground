@@ -10,7 +10,7 @@ import FRP.Event (Event, subscribe, makeEvent)
 import Network as Network
 import Message
 import Graphics.Drawing (Drawing, render)
-import Graphics
+import Draw
 
 messageEvent :: Network.Socket -> Event ActionResp
 messageEvent socket = makeEvent \k->
@@ -18,7 +18,9 @@ messageEvent socket = makeEvent \k->
   where
     handler k str = do
       case (readMessage str) of 
-        Right s -> void $ sequence (k <$> s)
+        Right s -> do
+          logShow s
+          void $ sequence (k <$> s)
         Left err -> void $ sequence (errorShow <$> err)
 
 serverWorld :: Network.Socket -> Behavior GameWorld
