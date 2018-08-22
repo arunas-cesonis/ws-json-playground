@@ -1,10 +1,11 @@
-module Network(connect, open, message, send, messageEventToString, Socket) where
+module Network(connect, open, message, send, messageEventToString, close, Socket) where
 
 import Prelude
 import Effect (Effect)
 import Effect.Console (log)
 
 import Data.Either (Either(..), hush)
+import Data.Filterable (filterMap)
 import Data.Maybe (Maybe(..), fromMaybe, fromJust, maybe)
 
 import Control.Monad.Except (runExcept)
@@ -44,6 +45,9 @@ makeWSEvent eventType socket = FRPE.makeEvent \k-> do
 message :: Socket -> FRPE.Event Event
 message = makeWSEvent WSET.onMessage
 
+stringMessage :: Socket -> FRPE.Event String
+stringMessage socket = filterMap identity (messageEventToString <$> message socket)
+
 open :: Socket -> FRPE.Event Event
 open = makeWSEvent WSET.onOpen
 
@@ -52,3 +56,6 @@ connect url = WS.create url []
 
 send :: Socket -> String -> Effect Unit
 send = WS.sendString
+
+close :: Socket -> Effect Unit
+close = WS.close
