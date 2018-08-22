@@ -1,6 +1,9 @@
 module Message
   ( readMessage
   , ActionResp(..)
+  , emptyGameWorld
+  , GameWorld
+  , TransportId
   , W
   , WMap
   , Avatar
@@ -35,7 +38,12 @@ data Shape =
   | MkCircle Number
   | MkRectangle Number Number
 
+data TransportId =
+    TAvatarId Int
+  | TObstacleId Int
+
 derive instance genericShape :: GR.Generic Shape _
+derive instance genericTransportId :: GR.Generic TransportId _
 
 instance showShape :: Show Shape where
   show = genericShow
@@ -43,7 +51,13 @@ instance showShape :: Show Shape where
 instance showActionResp :: Show ActionResp where
   show = genericShow
 
+instance showTransportId :: Show TransportId where
+  show = genericShow
+
 instance shapeReadForeign :: JSON.ReadForeign Shape where
+  readImpl = enumReadForeign
+
+instance transportIdReadForeign :: JSON.ReadForeign TransportId where
   readImpl = enumReadForeign
 
 instance actionRespReadForeign :: JSON.ReadForeign ActionResp where
@@ -73,6 +87,7 @@ type Obstacle =
   { object :: Object
   }
 
+
 newtype W a = W a
 
 instance showW :: Show a => Show (W a) where
@@ -85,8 +100,17 @@ instance readMap :: JSON.ReadForeign a => JSON.ReadForeign (W (M.Map String a)) 
       objectToMap x = M.fromFoldable ((FObject.toUnfoldable x) :: Array (Tuple String a))
 
 type WMap a =  W (M.Map String a)
+type GameWorld = { avatars :: WMap Avatar, obstacles :: WMap Obstacle }
 
-data ActionResp = GameWorldResp { avatars :: WMap Avatar, obstacles :: WMap Obstacle }
+data ActionResp = GameWorldResp GameWorld
+                | MoveResp TransportId Point
+                | RotateResp TransportId Angle
+
+emptyGameWorld :: GameWorld
+emptyGameWorld =
+  { avatars : W M.empty
+  , obstacles : W M.empty
+  }
 
 derive instance genericActionResp :: GR.Generic ActionResp _
 
