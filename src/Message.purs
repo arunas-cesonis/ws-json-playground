@@ -46,13 +46,6 @@ type Angle =
   { a :: Number
   }
 
-type Object2 =
-  { rotation :: Angle
-  , center :: Point
-  , velocity :: Angle
-  , shape :: Shape
-  }
-
 type Object =
   { center :: Point
   , shape :: Shape
