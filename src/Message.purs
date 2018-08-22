@@ -1,4 +1,16 @@
-module Message where
+module Message
+  ( readMessage
+  , ActionResp(..)
+  , W
+  , WMap
+  , Avatar
+  , Obstacle
+  , Object
+  , Point
+  , Shape
+  , Angle
+  )
+  where
 
 import Prelude
 import Control.Alt ((<|>))
