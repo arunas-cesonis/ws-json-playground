@@ -1,4 +1,7 @@
-module Network(connect, open, message, send, messageEventToString, close, Socket) where
+module Network
+  (connect,
+    onOpen,
+    onMessage, onStringMessage, send, messageEventToString, close, onClose, Socket) where
 
 import Prelude
 import Effect (Effect)
@@ -42,14 +45,17 @@ makeWSEvent eventType socket = FRPE.makeEvent \k-> do
   EET.addEventListener eventType listener false target
   pure (EET.removeEventListener eventType listener false target)
 
-message :: Socket -> FRPE.Event Event
-message = makeWSEvent WSET.onMessage
+onMessage :: Socket -> FRPE.Event Event
+onMessage = makeWSEvent WSET.onMessage
 
-stringMessage :: Socket -> FRPE.Event String
-stringMessage socket = filterMap identity (messageEventToString <$> message socket)
+onOpen :: Socket -> FRPE.Event Event
+onOpen = makeWSEvent WSET.onOpen
 
-open :: Socket -> FRPE.Event Event
-open = makeWSEvent WSET.onOpen
+onClose :: Socket -> FRPE.Event Event
+onClose = makeWSEvent WSET.onClose
+
+onStringMessage :: Socket -> FRPE.Event String
+onStringMessage socket = filterMap identity (messageEventToString <$> onMessage socket)
 
 connect :: String -> Effect Socket
 connect url = WS.create url []
