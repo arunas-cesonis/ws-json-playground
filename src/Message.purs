@@ -4,13 +4,13 @@ module Message
   , emptyGameWorld
   , GameWorld
   , TransportId
-  , W
+  , W(..)
   , WMap
   , Avatar
   , Obstacle
   , Object
   , Point
-  , Shape
+  , Shape(..)
   , Angle
   )
   where
