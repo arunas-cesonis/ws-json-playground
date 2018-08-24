@@ -32,9 +32,7 @@ newtype Message = Message
 
 messageEventToString :: Event -> Maybe String
 messageEventToString ev =
-  case ME.fromEvent ev of
-    Just msgEvent -> (hush <<< runExcept <<< readString <<< unsafeToForeign <<< ME.data_) msgEvent
-    Nothing -> Nothing
+  (hush <<< runExcept <<< readString <<< unsafeToForeign <<< ME.data_) =<< ME.fromEvent ev
 
 type Socket = WS.WebSocket
 
